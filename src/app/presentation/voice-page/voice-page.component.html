@@ -1,0 +1,23 @@
+<div class="container">
+  <h2>🎙️ Clonador de Voz (Frontend Clean Architecture)</h2>
+
+  <div>
+    <input type="file" (change)="onFileChange($event)" accept="audio/*" />
+    <div id="wave"></div>
+  </div>
+
+  <div>
+    <label>Texto a sintetizar</label>
+    <textarea [(ngModel)]="text" rows="4"></textarea>
+
+    <label>Selecciona voz</label>
+    <select [(ngModel)]="selected">
+      <option *ngFor="let v of voices" [value]="v.id">{{ v.name }} ({{ v.lang }})</option>
+    </select>
+
+    <button (click)="saveAudio()">Guardar audio</button>
+    <button (click)="cloneNow()">Clonar voz</button>
+  </div>
+
+  <div id="output" style="margin-top:15px;"></div>
+</div>

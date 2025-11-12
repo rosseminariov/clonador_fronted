@@ -1,0 +1,27 @@
+.container {
+  max-width: 800px;
+  margin: 24px auto;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 5px 18px rgba(0,0,0,0.1);
+}
+textarea, select {
+  width: 100%;
+  margin-bottom: 10px;
+}
+button {
+  margin-right: 10px;
+  background: #0ea5a4;
+  border: none;
+  color: white;
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+#wave {
+  height: 100px;
+  margin: 10px 0;
+  background: #f1f5f9;
+  border-radius: 8px;
+}
