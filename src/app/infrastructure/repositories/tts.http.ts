@@ -1,4 +1,3 @@
-// src/app/infrastructure/repositories/tts.http.ts
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
@@ -19,7 +18,7 @@ export class TTSHttp implements TTSPort {
     fd.append('voice_id', opts.voice_id);
     fd.append('text', opts.text ?? '');
     if (opts.audio_id != null) fd.append('audio_id', String(opts.audio_id));
-    if (opts.file) fd.append('file', opts.file, 'audio.webm');
+    if (opts.file) fd.append('file', opts.file, 'input.webm');
 
     return await firstValueFrom(
       this.http.post(`${this.cfg.apiUrl}/clone`, fd, { responseType: 'blob' })

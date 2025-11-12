@@ -1,7 +1,6 @@
-// src/app/infrastructure/repositories/audio-repo.http.ts
 import { Injectable, Inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';                 // 👈 IMPORTANTE
+import { firstValueFrom } from 'rxjs';
 import { Audio } from '../../domain/models/audio.model';
 import { AudioRepoPort } from '../../domain/ports/audio-repo.port';
 import { APP_CONFIG, AppConfig } from '../../core/config/app-config';
@@ -13,10 +12,6 @@ export class AudioRepoHttp implements AudioRepoPort {
   async upload(file: File): Promise<Audio> {
     const fd = new FormData();
     fd.append('file', file, file.name);
-
-    // 👇 Usar firstValueFrom para convertir Observable -> Promise
-    return await firstValueFrom(
-      this.http.post<Audio>(`${this.cfg.apiUrl}/audios`, fd)
-    );
+    return await firstValueFrom(this.http.post<Audio>(`${this.cfg.apiUrl}/audios`, fd));
   }
 }
