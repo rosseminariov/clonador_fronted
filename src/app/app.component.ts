@@ -1,19 +1,28 @@
-import { Component } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
-import { CommonModule } from '@angular/common';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { Component, OnInit } from '@angular/core';
+import { CommonModule } from '@angular/common';          // 👈 necesario para *ngIf
+
+// importa tu página principal
+import { VoicePageComponent } from './presentation/voice-page/voice-page.component';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, MatSlideToggleModule],
+  // 👇 aquí declaramos los módulos/comps que el template usa
+  imports: [
+    CommonModule,       // ✅ para *ngIf, *ngFor, etc.
+    VoicePageComponent  // ✅ tu página principal
+  ],
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'Clonador de Voz';
-  toggleDark(on: boolean) {
-    const cls = document.documentElement.classList;
-    on ? cls.add('dark') : cls.remove('dark');
+  showSplash = true;
+
+  ngOnInit(): void {
+    // Splash sencillo: visible ~1.2 segundos
+    setTimeout(() => {
+      this.showSplash = false;
+    }, 3000);
   }
 }

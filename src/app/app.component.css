@@ -1,1 +1,15 @@
-:host { display:block; }
+@keyframes splashSlide {
+  0% {
+    transform: translateX(-120%);
+  }
+  50% {
+    transform: translateX(20%);
+  }
+  100% {
+    transform: translateX(120%);
+  }
+}
+
+.animate-splash-bar {
+  animation: splashSlide 1.4s ease-in-out infinite;
+}
