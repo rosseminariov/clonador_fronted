@@ -1,15 +1,73 @@
-@keyframes splashSlide {
-  0% {
-    transform: translateX(-120%);
+.audio-bars {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+}
+/* BARRAS DE ECUALIZADOR (LOADER) */
+.loader-bar {
+  width: 10px;
+  height: 22px;
+  border-radius: 999px;
+  background: #111827;       /* negro fuerte */
+  animation: wave 1s infinite ease-in-out;
+}
+
+/* en dark mode, blanco */
+.dark .loader-bar {
+  background: #f9fafb;
+}
+
+/* pequeños desfases para generar la onda */
+.loader-bar:nth-child(1) { background: #374254; animation-delay: 0.60s; }
+.loader-bar:nth-child(2) { background: #2A3445; animation-delay: 0.40s; }
+.loader-bar:nth-child(3) { background: #1D2636; animation-delay: 0.20s; }
+.loader-bar:nth-child(4) { background: #111827; animation-delay: 0s; }
+.loader-bar:nth-child(5) { background: #1D2636; animation-delay: 0.20s; }
+.loader-bar:nth-child(6) { background: #2A3445; animation-delay: 0.40s; }
+.loader-bar:nth-child(7) { background: #374254; animation-delay: 0.60s; }
+
+/* animación de altura */
+@keyframes wave {
+  0%, 100% {
+    height: 12px;
+    opacity: 0.8;
   }
   50% {
-    transform: translateX(20%);
-  }
-  100% {
-    transform: translateX(120%);
+    height: 38px;
+    opacity: 1;
   }
 }
 
-.animate-splash-bar {
-  animation: splashSlide 1.4s ease-in-out infinite;
+/* ================== FONDO CELESTE → BLANCO → ROSA/LILA ================== */
+
+.splash-bg {
+  position: absolute;
+  inset: 0;
+
+  background: linear-gradient(
+    to bottom,
+    #c9ebff 0%,      /* celeste pastel arriba */
+    #eaf7ff 25%,     /* celeste muy suave */
+    #ffffff 50%,     /* blanco en el centro */
+    #f7e6ff 75%,     /* lila pastel suave */
+    #f3d4ff 100%     /* lila/rosa pastel abajo */
+  );
+
+  /* suavidad tipo Apple */
+  filter: blur(0.5px) saturate(1.1);
+
+  /* opcional: efecto respiración MUY suave */
+  animation: pastelShift 14s ease-in-out infinite alternate;
+}
+
+/* Movimiento casi imperceptible para hacerlo más vivo */
+@keyframes pastelShift {
+  0% {
+    background-position: 50% 0%;
+  }
+  100% {
+    background-position: 50% 100%;
+  }
 }

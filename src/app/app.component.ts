@@ -20,7 +20,7 @@ export class AppComponent implements OnInit {
   showSplash = true;
 
   ngOnInit(): void {
-    // Splash sencillo: visible ~1.2 segundos
+    // Splash sencillo: visible ~3 segundos
     setTimeout(() => {
       this.showSplash = false;
     }, 3000);
