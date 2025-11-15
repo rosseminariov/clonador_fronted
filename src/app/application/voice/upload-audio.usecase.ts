@@ -1,11 +1,12 @@
+// src/app/application/voice/upload-audio.usecase.ts
 import { Injectable } from '@angular/core';
 import { AudioRepoPort } from '../../domain/ports/audio-repo.port';
-import { Audio } from '../../domain/models/audio.model';
 
 @Injectable({ providedIn: 'root' })
 export class UploadAudioUseCase {
   constructor(private repo: AudioRepoPort) {}
-  execute(file: File): Promise<Audio> {
+
+  execute(file: File): Promise<{ voice_id: string }> {
     return this.repo.upload(file);
   }
 }

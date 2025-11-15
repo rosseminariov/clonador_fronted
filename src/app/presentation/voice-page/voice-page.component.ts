@@ -14,12 +14,10 @@ import { MatIconModule } from '@angular/material/icon';
 
 import { UploadAudioUseCase } from '../../application/voice/upload-audio.usecase';
 import { CloneVoiceUseCase } from '../../application/voice/clone-voice.usecase';
-import { TTSPort } from '../../domain/ports/tts.port';
 
 @Component({
   selector: 'app-voice-page',
   standalone: true,
-  // 👇 IMPORTA aquí TODOS los módulos que usas en el HTML
   imports: [
     CommonModule,
     FormsModule,
@@ -32,25 +30,30 @@ import { TTSPort } from '../../domain/ports/tts.port';
     MatIconModule,
   ],
   templateUrl: './voice-page.component.html',
-  styleUrls: ['./voice-page.component.css']
+  styleUrls: ['./voice-page.component.css'],
 })
 export class VoicePageComponent implements OnInit {
   wave?: WaveSurfer;
-  voices: any[] = [];
-  selected = 'voice_1';
-  text = '';
 
+  // texto y parámetros de síntesis
+  text = 'Hola, soy un clon de tu voz usando inteligencia artificial.';
+  lang = 'es';
+  speed = 1.0;
+
+  // archivo subido y preview
   blob?: Blob;
   blobUrl?: string;
-  audioId?: number;
 
+  // voice_id que devuelve el backend al entrenar
+  voiceId?: string;
+
+  // estados de carga
   uploading = false;
   cloning = false;
 
   constructor(
     private uploadAudio: UploadAudioUseCase,
     private cloneVoice: CloneVoiceUseCase,
-    private tts: TTSPort,
     private snack: MatSnackBar
   ) {}
 
@@ -60,9 +63,8 @@ export class VoicePageComponent implements OnInit {
       height: 100,
       waveColor: '#93c5fd',
       progressColor: '#0ea5a4',
-      cursorColor: '#0f172a'
+      cursorColor: '#0f172a',
     });
-    this.voices = await this.tts.listVoices();
   }
 
   onFileChange(ev: Event) {
@@ -80,34 +82,63 @@ export class VoicePageComponent implements OnInit {
   }
 
   async saveAudio() {
-    if (!this.blob) return;
+    if (!this.blob) {
+      this.snack.open('Primero selecciona un archivo de audio', 'Cerrar', {
+        duration: 3000,
+      });
+      return;
+    }
+
     try {
       this.uploading = true;
       const res = await this.uploadAudio.execute(this.blob as File);
-      this.audioId = res.id;
-      this.snack.open(`Audio guardado (ID ${res.id})`, 'OK', { duration: 2500 });
-    } catch {
-      this.snack.open('Error al guardar audio', 'Cerrar', { duration: 3000 });
+      this.voiceId = res.voice_id;
+
+      this.snack.open(
+        `Voz entrenada correctamente (voice_id: ${this.voiceId})`,
+        'OK',
+        { duration: 3000 }
+      );
+    } catch (e) {
+      console.error(e);
+      this.snack.open('Error al entrenar la voz', 'Cerrar', { duration: 3000 });
     } finally {
       this.uploading = false;
     }
   }
 
   async cloneNow() {
+    if (!this.voiceId) {
+      this.snack.open('Primero entrena una voz con tu audio', 'Cerrar', {
+        duration: 3000,
+      });
+      return;
+    }
+
+    if (!this.text || !this.text.trim()) {
+      this.snack.open('Escribe un texto para sintetizar', 'Cerrar', {
+        duration: 3000,
+      });
+      return;
+    }
+
     try {
       this.cloning = true;
       const out = await this.cloneVoice.execute({
-        voice_id: this.selected,
+        voice_id: this.voiceId,
         text: this.text,
-        audio_id: this.audioId,
-        file: this.audioId ? undefined : this.blob
+        lang: this.lang,
+        speed: this.speed,
       });
+
       const url = URL.createObjectURL(out);
       const audio = new Audio(url);
       audio.controls = true;
       document.getElementById('output')!.replaceChildren(audio);
+
       this.snack.open('Voz clonada ✅', 'Reproducir', { duration: 2500 });
-    } catch {
+    } catch (e) {
+      console.error(e);
       this.snack.open('Error en clonación', 'Cerrar', { duration: 3000 });
     } finally {
       this.cloning = false;
