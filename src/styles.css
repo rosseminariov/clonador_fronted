@@ -2,3 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 html.dark { color-scheme: dark; } /* opcional */
+body {
+  background: linear-gradient(180deg, #dbb6ee 100%);
+  overflow-x: hidden;
+}
+
+.dark body {
+  background: linear-gradient(180deg,#7f4ca5 100%);
+  overflow-x: hidden;
+}
+/* ----- CONTENEDOR DEL FONDO ANIMADO ----- */
+.music-notes {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Formato de las notas */
+.note {
+  position: absolute;
+  font-size: 20px;
+  opacity: 0.35;
+  animation: floatNote 6s linear infinite;
+  color: #7a3cff; /* violeta bonito */
+}
+
+/* Modo oscuro → estrellas amarillas */
+.dark .note {
+  color: #ffe88a;  /* estrella suave */
+  opacity: 0.6;
+}
+
+/* Animación */
+@keyframes floatNote {
+  0% {
+    transform: translateY(110vh) translateX(0);
+    opacity: 0;
+  }
+  15% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: translateY(-10vh) translateX(20px);
+    opacity: 0;
+  }
+}

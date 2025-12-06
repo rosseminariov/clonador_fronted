@@ -4,16 +4,13 @@
   class="fixed inset-0 z-[9999] flex items-center justify-center overflow-hidden
          bg-white dark:bg-black"
 >
-  <!-- Fondos con blobs -->
-   <div class="splash-bg"></div>  <!-- ESTE ES EL FONDO -->
+  <div class="splash-bg"></div>
 
-  <!-- TEXTO / MARCA -->
   <div class="relative text-center">
     <div class="text-4xl md:text-6xl font-extrabold tracking-tight text-zinc-900 dark:text-zinc-50">
       VoxiClone AI
     </div>
 
-    <!-- BARRA DE PROGRESO -->
     <div class="flex items-center justify-center mt-6 space-x-2 h-[40px]">
       <div class="loader-bar"></div>
       <div class="loader-bar"></div>
@@ -28,11 +25,4 @@
 
 <!-- ========== CONTENIDO REAL DE LA APP ========== -->
 
-<header class="p-4 border-b border-zinc-200 dark:border-zinc-800">
-  <h3 class="m-0">{{ title }}</h3>
-</header>
-
-<main class="p-4">
-  <!-- Mostramos directamente tu página principal -->
-  <app-voice-page></app-voice-page>
-</main>
+<app-voice-page></app-voice-page>

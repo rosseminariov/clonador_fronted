@@ -1,99 +1,350 @@
-<div class="max-w-6xl mx-auto">
-  <div
-    class="bg-white dark:bg-zinc-900 rounded-2xl shadow ring-1 ring-black/5 dark:ring-white/10 p-5"
-  >
-    <div class="flex items-center gap-2 mb-4">
-      <span class="material-icons text-brand-600">mic</span>
-      <h2 class="text-xl font-semibold text-zinc-900 dark:text-zinc-50">
-        Clonador de Voz (Frontend Clean Architecture)
-      </h2>
-    </div>
+<!-- src/app/presentation/voice-page/voice-page.component.html -->
 
-    <div class="grid md:grid-cols-2 gap-6">
-      <!-- Izquierda: archivo + waveform -->
-      <div>
-        <button
-          mat-stroked-button
-          color="primary"
-          (click)="fileInput.click()"
-        >
-          <span class="material-icons">upload_file</span>&nbsp;Seleccionar
-          archivo
-        </button>
-        <input
-          #fileInput
-          type="file"
-          (change)="onFileChange($event)"
-          accept="audio/*"
-          hidden
-        />
+<!-- Toast de mensajes -->
+<div
+  *ngIf="toastVisible"
+  class="fixed top-4 right-4 z-50 px-4 py-2 rounded-xl text-sm shadow-lg"
+  [ngClass]="{
+    'bg-emerald-100 text-emerald-900': toastType === 'success',
+    'bg-rose-100 text-rose-900': toastType === 'error',
+    'bg-zinc-900 text-zinc-50': toastType === 'info'
+  }"
+>
+  {{ toastMessage }}
+</div>
+<!-- ========== HEADER SUPERIOR ========== -->
+<header
+  class="w-full px-8 py-4 flex items-center justify-between border-b border-zinc-200/60
+         dark:border-zinc-800 bg-white dark:bg-zinc-900 sticky top-0 z-40"
+>
+  <!-- Logo -->
+  <div class="flex items-center gap-3">
+<div class="flex items-center gap-2">
+  <span class="material-icons text-4xl text-zinc-900 dark:text-zinc-50">
+    headphones
+  </span>
+  <span class="material-icons text-2xl text-violet-500 dark:text-violet-300">
+    graphic_eq
+  </span>
+</div>
 
-        <div
-          id="wave"
-          class="mt-3 rounded-lg border border-zinc-200 dark:border-zinc-700 bg-zinc-50 dark:bg-zinc-800 h-[110px]"
-        ></div>
 
-        <!-- Barra de progreso al subir -->
-        <mat-progress-bar
-          *ngIf="uploading"
-          mode="indeterminate"
-          class="mt-3"
-        ></mat-progress-bar>
 
-        <div class="mt-2 text-xs text-zinc-500 dark:text-zinc-400">
-          <span *ngIf="voiceId">✅ voice_id entrenado: {{ voiceId }}</span>
-          <span *ngIf="!voiceId">Aún no hay voice_id entrenado.</span>
-        </div>
-      </div>
 
-      <!-- Derecha: texto + acciones -->
-      <div>
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Texto a sintetizar</mat-label>
-          <textarea
-            matInput
-            [(ngModel)]="text"
-            rows="5"
-            placeholder="Escribe el texto..."
-          ></textarea>
-        </mat-form-field>
 
-        <!-- (Opcional) podrías añadir controles para lang y speed -->
-        <!--
-        <mat-form-field appearance="outline" class="w-full">
-          <mat-label>Idioma</mat-label>
-          <input matInput [(ngModel)]="lang" />
-        </mat-form-field>
-        -->
+    <span class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+      VoxiClone AI
+    </span>
+  </div>
 
-        <div class="flex gap-3 mt-2">
-          <button
-            mat-raised-button
-            color="primary"
-            (click)="saveAudio()"
-            [disabled]="!blob || uploading"
-          >
-            <span class="material-icons">save</span>&nbsp;Entrenar voz
-          </button>
-          <button
-            mat-raised-button
-            color="accent"
-            (click)="cloneNow()"
-            [disabled]="cloning || !voiceId"
-          >
-            <span class="material-icons">auto_fix_high</span>&nbsp;Clonar voz
-          </button>
-        </div>
+  <!-- Controles -->
+  <div class="flex items-center gap-4">
 
-        <div class="mt-4" id="output"></div>
-      </div>
-    </div>
-
-    <div
-      class="flex items-center gap-2 text-xs text-zinc-500 dark:text-zinc-400 mt-4"
+    <!-- DARK MODE -->
+    <button
+      type="button"
+      class="flex items-center gap-1 text-sm text-zinc-600 dark:text-zinc-300 hover:text-zinc-900 dark:hover:text-white"
+      (click)="toggleDarkMode()"
     >
-      <span class="material-icons !text-base">info</span>
-      <span>Formatos soportados por el navegador: webm/ogg/wav/mp3</span>
+      <span class="material-icons !text-base">dark_mode</span>
+      Dark
+    </button>
+
+    <!-- Avatar -->
+    <div
+      class="w-8 h-8 rounded-full bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center
+             text-zinc-600 dark:text-zinc-300 cursor-pointer"
+    >
+      <span class="material-icons !text-base">person</span>
+    </div>
+  </div>
+</header>
+
+<section class="max-w-6xl mx-auto pt-6 pb-12 space-y-3">
+  <!-- Título principal -->
+  <header class="flex items-center justify-between mb-2">
+    <h1 class="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+      Clonador de voz
+    </h1>
+  </header>
+
+  <!-- ========== CARD SUPERIOR: SUBIR / ENTRENAR AUDIO ========== -->
+  <div
+    class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200/70 dark:border-zinc-800 overflow-hidden"
+  >
+<!-- zona drag & drop -->
+<div
+  class="px-10 py-10 border-b border-zinc-200/60 dark:border-zinc-800 flex flex-col items-center justify-center text-center"
+>
+  <div
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+    class="w-full max-w-3xl rounded-2xl border-2 border-dashed transition-all
+           flex flex-col items-center justify-center px-6 py-10
+           bg-zinc-50/70 dark:bg-zinc-900/50 text-zinc-500 dark:text-zinc-400"
+    [ngClass]="{
+      'border-zinc-300 dark:border-zinc-700': !isDragOver,
+      'border-violet-400 bg-violet-50/60 dark:border-violet-400 dark:bg-violet-950/40':
+        isDragOver
+    }"
+  >
+    <!-- Icono central -->
+    <div
+      class="w-10 h-10 rounded-full flex items-center justify-center mb-4
+             bg-zinc-900 text-white dark:bg-zinc-50 dark:text-zinc-900"
+    >
+      <span class="material-icons text-base">cloud_upload</span>
+    </div>
+
+    <p class="text-sm font-medium mb-1">
+      Haz clic para subir, o arrastra y suelta
+    </p>
+    <p class="text-xs text-zinc-400 mb-4">
+      Archivos de audio de hasta 50&nbsp;MB cada uno
+    </p>
+
+    <!-- Botón seleccionar archivo -->
+    <button
+      type="button"
+      class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border
+             border-zinc-300 text-xs font-medium text-zinc-700 bg-white
+             hover:bg-zinc-50 active:scale-[0.98] transition"
+      (click)="fileInput.click()"
+    >
+      <span class="material-icons !text-sm">upload_file</span>
+      Seleccionar archivo
+    </button>
+
+    <input
+      #fileInput
+      type="file"
+      accept="audio/*"
+      class="hidden"
+      (change)="onFileChange($event)"
+    />
+
+    <div class="mt-4 text-xs text-zinc-400" *ngIf="selectedFileName">
+      {{ selectedFileName }}
     </div>
   </div>
 </div>
+
+
+    <!-- barra inferior de la card: guardar audio -->
+    <div
+      class="px-10 py-4 flex items-center justify-between text-xs text-zinc-500 dark:text-zinc-400"
+    >
+      <div class="flex items-center gap-3">
+        <span class="material-icons !text-sm text-zinc-400">lock</span>
+        <span>
+          Tus audios se procesan de forma segura para entrenar el
+          <code class="px-1 py-0.5 rounded bg-zinc-100 dark:bg-zinc-800"
+            >voice_id</code
+          >.
+        </span>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <span *ngIf="voiceId" class="text-emerald-600 dark:text-emerald-400">
+          ✅ voice_id entrenado
+        </span>
+        <button
+          type="button"
+          class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold
+                 bg-blue-600 text-white hover:bg-blue-500 active:scale-[0.98]
+                 disabled:opacity-60 disabled:cursor-not-allowed"
+          (click)="saveAudio()"
+          [disabled]="!hasAudio || uploading"
+        >
+          <span class="material-icons !text-sm">save</span>
+          Guardar audio
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========== CARD TEXTO / CLONAR ========== -->
+  <div
+    class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200/70 dark:border-zinc-800 overflow-hidden"
+  >
+    <div class="px-10 py-6 space-y-4">
+      <p class="text-xs text-zinc-500 dark:text-zinc-400">
+        Empieza a escribir aquí o pega cualquier texto que quieras convertir
+      </p>
+
+      <div class="relative">
+        <textarea
+          class="w-full min-h-[140px] rounded-2xl border border-zinc-200 dark:border-zinc-700
+                 bg-zinc-50/80 dark:bg-zinc-900/60 px-4 py-3 text-sm
+                 text-zinc-800 dark:text-zinc-50 resize-none outline-none
+                 focus:ring-2 focus:ring-violet-300 focus:border-violet-300
+                 disabled:opacity-50 disabled:cursor-not-allowed"
+          [(ngModel)]="text"
+          [readOnly]="!hasAudio"
+          [disabled]="!hasAudio"
+          placeholder="Sube primero un audio para habilitar el texto…"
+        ></textarea>
+
+        <!-- Overlay pequeño indicando que falta audio -->
+        <div
+          *ngIf="!hasAudio"
+          class="pointer-events-none absolute inset-0 flex items-center justify-center"
+        >
+          <span
+            class="px-3 py-1 rounded-full text-xs bg-white/80 dark:bg-zinc-900/80
+                   text-zinc-400 border border-dashed border-zinc-300"
+          >
+            Sube un audio para habilitar el texto
+          </span>
+        </div>
+      </div>
+
+      <!-- Fila de opciones (decorativa) -->
+      <div
+        class="flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-500 dark:text-zinc-400"
+      >
+        <div class="flex items-center gap-4">
+          <div >
+            <span class="material-icons !text-sm"></span>
+            <span></span>
+          </div>
+          <div >
+            <span class="material-icons !text-sm"></span>
+            <span></span>
+          </div>
+          <div >
+            <span class="material-icons !text-sm"></span>
+            <span></span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="inline-flex items-center gap-2 px-5 py-2 rounded-full text-xs font-semibold
+                   bg-pink-500 text-white hover:bg-pink-400 active:scale-[0.98]
+                   disabled:opacity-60 disabled:cursor-not-allowed"
+            (click)="cloneNow()"
+            [disabled]="cloning || !voiceId"
+          >
+            <span class="material-icons !text-sm">auto_fix_high</span>
+            Clonar voz
+          </button>
+        </div>
+      </div>
+
+      <!-- Reproductor de la última clonación -->
+      <div id="output" class="mt-4"></div>
+    </div>
+  </div>
+
+  <!-- ========== BUSCADOR HISTORIAL ========== -->
+  <div class="max-w-6xl mx-auto">
+    <div class="relative max-w-md">
+      <span
+        class="material-icons absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 text-base"
+      >
+        search
+      </span>
+      <input
+        type="text"
+        [(ngModel)]="searchTerm"
+        class="w-full pl-9 pr-3 py-2 rounded-full border border-zinc-200
+               bg-white dark:bg-zinc-900 text-xs text-zinc-700 dark:text-zinc-100
+               focus:ring-2 focus:ring-violet-300 focus:border-violet-300 outline-none"
+        placeholder="Buscar en el historial"
+      />
+    </div>
+  </div>
+
+  <!-- ========== TABLA HISTORIAL ========== -->
+  <div
+    class="bg-white dark:bg-zinc-900 rounded-2xl shadow-sm border border-zinc-200/70 dark:border-zinc-800 overflow-hidden"
+  >
+    <table class="w-full text-sm">
+      <thead
+        class="bg-zinc-50/80 dark:bg-zinc-900/70 text-xs uppercase tracking-wide text-zinc-400"
+      >
+        <tr>
+          <th class="text-left px-6 py-3">Nombre</th>
+          <th class="text-left px-4 py-3 w-24">Duración</th>
+          <th class="text-left px-4 py-3 w-24">Formato</th>
+          <th class="text-right px-6 py-3 w-16"></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          *ngFor="let item of filteredHistory()"
+          class="border-t border-zinc-100 dark:border-zinc-800 hover:bg-zinc-50/60 dark:hover:bg-zinc-900/50 transition"
+        >
+          <!-- Nombre + icono + edición -->
+          <td class="px-6 py-3">
+            <div class="flex items-center gap-3">
+              <div
+                class="w-8 h-8 rounded-full flex items-center justify-center bg-zinc-100 dark:bg-zinc-800"
+              >
+                <span class="material-icons text-zinc-500 !text-base">
+                  graphic_eq
+                </span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <input
+                  *ngIf="item.editing"
+                  [(ngModel)]="item.name"
+                  (blur)="finishEdit(item)"
+                  (keyup.enter)="finishEdit(item)"
+                  class="border-b border-violet-300 bg-transparent text-sm outline-none
+                         text-zinc-800 dark:text-zinc-50"
+                />
+                <span
+                  *ngIf="!item.editing"
+                  class="text-sm text-zinc-800 dark:text-zinc-50"
+                >
+                  {{ item.name }}
+                </span>
+
+                <button
+                  type="button"
+                  class="p-1 rounded-full hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-400"
+                  (click)="enableEdit(item)"
+                >
+                  <span class="material-icons !text-sm">edit</span>
+                </button>
+              </div>
+            </div>
+          </td>
+
+          <!-- Duración -->
+          <td class="px-4 py-3 text-zinc-500 dark:text-zinc-400">
+            {{ item.duration }}
+          </td>
+
+          <!-- Formato -->
+          <td class="px-4 py-3 text-zinc-500 dark:text-zinc-400">
+            {{ item.format }}
+          </td>
+
+          <!-- Descargar -->
+          <td class="px-6 py-3 text-right">
+            <a
+              class="inline-flex items-center justify-center w-8 h-8 rounded-full
+                     hover:bg-zinc-100 dark:hover:bg-zinc-800 text-zinc-500"
+              [href]="item.url"
+              [download]="item.name + '.' + item.format"
+            >
+              <span class="material-icons !text-base">download</span>
+            </a>
+          </td>
+        </tr>
+
+        <tr *ngIf="history.length === 0">
+          <td colspan="4" class="px-6 py-6 text-center text-xs text-zinc-400">
+            Aún no hay audios clonados. Clona tu primer texto para verlo aquí.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
